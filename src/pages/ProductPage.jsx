@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
-import Button from "../Components/Ui/Button";
-import Icon from "../Components/Ui/Icon";
-import ProductImage from "../Components/Ui/ProductImage";
+import Button from "../components/ui/Button";
+import Icon from "../components/ui/Icon";
+import ProductImage from "../components/ui/ProductImage";
 import { useCart } from "../hooks/useCart";
 import { getProductById } from "../services/productService";
 import { getProductImage } from "../utils/productImage";

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { BUILDER_SLOTS } from "../data/builderSlots";
-import PartSlot from "../Features/PartSlot";
-import SummaryPanel from "../Features/builder/SummaryPanel";
+import PartSlot from "../features/builder/PartSlot";
+import SummaryPanel from "../features/builder/SummaryPanel";
 import { checkCompatibility } from "../utils/compatibility";
 import { useCart } from "../hooks/useCart";
 import { getProducts } from "../services/productService";
-import Icon from "../Components/Ui/Icon";
+import Icon from "../components/ui/Icon";
 
 function BuilderPage() {
   const { addToCart } = useCart();

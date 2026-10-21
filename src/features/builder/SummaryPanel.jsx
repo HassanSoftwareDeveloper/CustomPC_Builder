@@ -1,4 +1,4 @@
-import Button from "../../Components/Ui/Button";
+import Button from "../../components/ui/Button";
 
 function SummaryPanel({ parts, total, issues, isComplete, onAddBuild }) {
   const hasIssues = issues.length > 0;

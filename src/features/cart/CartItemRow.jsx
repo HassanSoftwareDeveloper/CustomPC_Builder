@@ -1,5 +1,5 @@
-import Icon from "../../Components/Ui/Icon";
-import ProductImage from "../../Components/Ui/ProductImage";
+import Icon from "../../components/ui/Icon";
+import ProductImage from "../../components/ui/ProductImage";
 import { getProductImage } from "../../utils/productImage";
 
 function CartItemRow({ item, onChangeQuantity, onRemove }) {

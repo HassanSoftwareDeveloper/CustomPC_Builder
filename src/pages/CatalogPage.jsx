@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import Button from "../Components/Ui/Button";
+import Button from "../components/ui/Button";
 import Icon from "../components/ui/Icon";
 import { BUILDER_SLOTS } from "../data/builderSlots";
-import CatalogFilters from "../Features/catalog/CatalogFilters";
-import ProductCard from "../Features/catalog/ProductCard";
+import CatalogFilters from "../features/catalog/CatalogFilters";
+import ProductCard from "../features/catalog/ProductCard";
 import { getProducts } from "../services/productService";
 
 const CATEGORIES = ["All parts", ...BUILDER_SLOTS];

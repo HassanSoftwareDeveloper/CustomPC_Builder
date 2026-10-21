@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import StatCard from "../Components/Ui/StatCard";
+import StatCard from "../components/ui/StatCard";
 import { getOrders } from "../services/orderService";
 import { getProducts } from "../services/productService";
 

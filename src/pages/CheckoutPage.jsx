@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
-import Icon from "../Components/Ui/Icon";
-import CheckoutForm from "../Features/checkout/CheckoutForm";
+import Icon from "../components/ui/Icon";
+import CheckoutForm from "../features/checkout/CheckoutForm";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
 import { saveOrder } from "../services/orderService";

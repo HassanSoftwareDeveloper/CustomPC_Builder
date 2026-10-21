@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import Icon from "../Ui/Icon";
+import Icon from "../ui/Icon";
 
 const ADMIN_LINKS = [
   { label: "Dashboard", to: "/admin", end: true, icon: "box" },

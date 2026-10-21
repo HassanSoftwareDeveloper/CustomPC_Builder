@@ -3,7 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { ROLES } from "../../constants/roles";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
-import Icon from "../Ui/Icon";
+import Icon from "../ui/Icon";
 
 const NAV_LINKS = [
   { label: "Home", to: "/" },

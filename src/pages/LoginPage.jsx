@@ -1,6 +1,6 @@
 import { Link, Navigate } from "react-router-dom";
-import AuthLayout from "../Components/Layout/AuthLayout";
-import LoginForm from "../Features/Auth/LoginForm";
+import AuthLayout from "../components/layout/AuthLayout";
+import LoginForm from "../features/auth/LoginForm";
 import { ROLES } from "../constants/roles";
 import { useAuth } from "../hooks/useAuth";
 

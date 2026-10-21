@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import Icon from "../Ui/Icon";
+import Icon from "../ui/Icon";
 
 function Footer() {
   return (

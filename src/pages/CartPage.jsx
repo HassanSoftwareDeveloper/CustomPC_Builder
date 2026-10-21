@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import Icon from "../Components/Ui/Icon";
-import CartItemRow from "../Features/cart/CartItemRow";
+import Icon from "../components/ui/Icon";
+import CartItemRow from "../features/cart/CartItemRow";
 import { useCart } from "../hooks/useCart";
 
 function CartPage() {

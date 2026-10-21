@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Button from "../Components/Ui/Button";
-import ProductForm from "../Features/Admin/ProductForm";
+import Button from "../components/ui/Button";
+import ProductForm from "../features/admin/ProductForm";
 import {
   addProduct,
   deleteProduct,

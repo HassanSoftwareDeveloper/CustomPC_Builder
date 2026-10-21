@@ -1,4 +1,4 @@
-import Icon from "../../Components/Ui/Icon";
+import Icon from "../../components/ui/Icon";
 
 function CatalogFilters({ search, category, categories, sort, onSearchChange, onCategoryChange, onSortChange }) {
   return (

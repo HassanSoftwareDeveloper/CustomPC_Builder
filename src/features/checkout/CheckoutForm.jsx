@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Button from "../../Components/Ui/Button";
-import Input from "../../Components/Ui/Input";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
 import { validateCheckout } from "../../utils/validators";
 
 const CITIES = [
