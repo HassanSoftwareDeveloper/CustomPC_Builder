@@ -51,7 +51,8 @@ export function validateCheckout({ fullName, phone, city, address }) {
   return errors;
 }
 
-export function validateProduct({ name, category, price }) {
+const SOCKET_CATEGORIES = ["Processor", "Motherboard"];
+export function validateProduct({ name, category, price , socket}) {
   const errors = {};
 
   if (name.trim().length < 2) {
@@ -64,5 +65,10 @@ export function validateProduct({ name, category, price }) {
     errors.price = "Enter a price greater than 0.";
   }
 
+  if (SOCKET_CATEGORIES.includes(category) && !socket.trim()){
+    errors.socket ="Enter the socket, for example AM4.";
+  }
   return errors;
 }
+
+

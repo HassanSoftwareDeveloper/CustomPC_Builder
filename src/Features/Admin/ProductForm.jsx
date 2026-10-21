@@ -49,7 +49,7 @@ function ProductForm({ product, onSave, onCancel }) {
       image: values.image.trim(),
     };
     if (values.socket.trim()) {
-      cleaned.socket = values.socket.trim();
+      cleaned.socket = values.socket.trim().toUpperCase();
     }
 
     onSave(cleaned);
@@ -123,6 +123,7 @@ function ProductForm({ product, onSave, onCancel }) {
         placeholder="For example AM4"
         value={values.socket}
         onChange={handleChange}
+        error={errors.socket}
       />
       <Input
         id="image"

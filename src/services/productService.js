@@ -1,6 +1,6 @@
 import { PRODUCTS } from "../data/products";
-
-const STORAGE_KEY = "customizePC_products";
+import { STORAGE_KEYS } from "../constants/storageKeys";
+const STORAGE_KEY =  STORAGE_KEYS.PRODUCTS;
 
 function saveProducts(products) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));

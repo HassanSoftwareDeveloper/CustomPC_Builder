@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { CartContext } from "./createCartContext";
+import { STORAGE_KEYS } from "../constants/storageKeys";
 
-const STORAGE_KEY = "apnapc_cart";
+const STORAGE_KEY = STORAGE_KEYS.CART;
 
 function loadCart() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -79,8 +80,14 @@ export function CartProvider({ children }) {
     >
       {children}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 flex max-w-sm items-center gap-4 rounded-xl border border-border bg-surface px-5 py-4 text-ink shadow-lg" role="status" aria-live="polite">
-          <span aria-hidden="true" className="text-lg text-primary">✓</span>
+        <div
+          className="fixed bottom-5 right-5 z-50 flex max-w-sm items-center gap-4 rounded-xl border border-border bg-surface px-5 py-4 text-ink shadow-lg"
+          role="status"
+          aria-live="polite"
+        >
+          <span aria-hidden="true" className="text-lg text-primary">
+            ✓
+          </span>
           <p className="flex-1 text-sm font-medium">{toastMessage}</p>
           <button
             type="button"

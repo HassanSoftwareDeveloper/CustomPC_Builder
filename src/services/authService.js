@@ -1,8 +1,10 @@
 import { MOCK_USERS } from "../data/mockUsers";
 import { ROLES } from "../constants/roles";
+import { STORAGE_KEYS } from "../constants/storageKeys";
 
-const USERS_KEY = "apnapc_users";
-const SESSION_KEY = "apnapc_session";
+
+const USERS_KEY = STORAGE_KEYS.USERS;
+const SESSION_KEY = STORAGE_KEYS.SESSION;
 const FAKE_DELAY_MS = 500;
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
