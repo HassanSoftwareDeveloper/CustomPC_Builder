@@ -1,0 +1,15 @@
+$kind: http-request
+name: http://localhost:4000/api/builds/check
+description: ""
+url: http://localhost:4000/api/auth/login
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"email\": \"admin@apnapc.test\",\r
+
+    \  \"password\": \"admin123\"\r
+
+    }"
+order: 1000
