@@ -3,11 +3,13 @@ import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 
+const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const router = express.Router();
 
 const wrap = (fn) => (req, res, next) => fn(req, res, next).catch(next);
 
-// GET /api/products?category=cpu&search=ryzen&minPrice=0&maxPrice=100000
+
 router.get(
   "/",
   wrap(async (req, res) => {
@@ -15,7 +17,7 @@ router.get(
     const filter = {};
 
     if (category) filter.category = category;
-    if (search) filter.name = { $regex: search, $options: "i" };
+    if (search) filter.name = { $regex: escapeRegex(String(search)), $options: "i" };
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = Number(minPrice);
@@ -27,7 +29,7 @@ router.get(
   })
 );
 
-// GET /api/products/:id
+
 router.get(
   "/:id",
   wrap(async (req, res) => {
@@ -40,7 +42,7 @@ router.get(
   })
 );
 
-// POST /api/products  (admin only: add a product)
+
 router.post(
   "/",
   protect,
@@ -51,7 +53,7 @@ router.post(
   })
 );
 
-// PUT /api/products/:id  (admin only: edit a product)
+
 router.put(
   "/:id",
   protect,
@@ -69,7 +71,7 @@ router.put(
   })
 );
 
-// DELETE /api/products/:id  (admin only)
+
 router.delete(
   "/:id",
   protect,

@@ -8,7 +8,7 @@ const router = express.Router();
 const STATUSES = ["Pending", "Assembling", "Testing", "Shipped", "Delivered", "Cancelled"];
 const wrap = (fn) => (req, res, next) => fn(req, res, next).catch(next);
 
-// Backend shape -> the shape your frontend already uses
+
 function formatOrder(doc) {
   const o = doc.toObject();
   return {
@@ -28,7 +28,13 @@ function formatOrder(doc) {
   };
 }
 
-// POST /api/orders  (logged-in customer places an order)
+async function giveBackStock(lines) {
+  for (const line of lines) {
+    await Product.updateOne({ _id: line.product }, { $inc: { stock: line.quantity } });
+  }
+}
+
+
 router.post(
   "/",
   protect,
@@ -41,25 +47,32 @@ router.post(
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Your cart is empty." });
     }
-    if (items.some((i) => !mongoose.isValidObjectId(i.id))) {
+    if (items.some((i) => !mongoose.isValidObjectId(i?.id))) {
       return res.status(400).json({ message: "Your cart has an old item. Please clear it and add parts again." });
     }
 
-    const products = await Product.find({ _id: { $in: items.map((i) => i.id) } });
+    
+    const wanted = new Map();
+    for (const item of items) {
+      const quantity = Number(item.quantity);
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        return res.status(400).json({ message: "Invalid quantity." });
+      }
+      const key = String(item.id);
+      wanted.set(key, (wanted.get(key) || 0) + quantity);
+    }
+
+    const products = await Product.find({ _id: { $in: [...wanted.keys()] } });
     const byId = new Map(products.map((p) => [String(p._id), p]));
 
     let total = 0;
     const lines = [];
-    for (const item of items) {
-      const product = byId.get(String(item.id));
-      const quantity = Number(item.quantity);
+    for (const [id, quantity] of wanted) {
+      const product = byId.get(id);
       if (!product) {
         return res.status(400).json({ message: "A part in your cart no longer exists." });
       }
-      if (!Number.isInteger(quantity) || quantity < 1) {
-        return res.status(400).json({ message: "Invalid quantity." });
-      }
-      total += product.price * quantity; // price comes from the database
+      total += product.price * quantity; 
       lines.push({
         product: product._id,
         name: product.name,
@@ -69,24 +82,47 @@ router.post(
       });
     }
 
-    const order = await Order.create({
-      user: req.user._id,
-      customer: {
-        fullName: customer.fullName,
-        phone: customer.phone,
-        city: customer.city,
-        address: customer.address,
-        paymentMethod: customer.paymentMethod === "bank" ? "bank" : "cod",
-      },
-      items: lines,
-      total,
-    });
+  
+    const reduced = [];
+    for (const line of lines) {
+      const updated = await Product.findOneAndUpdate(
+        { _id: line.product, stock: { $gte: line.quantity } },
+        { $inc: { stock: -line.quantity } }
+      );
+
+      if (!updated) {
+        await giveBackStock(reduced); 
+        return res.status(400).json({
+          message: `Sorry, "${line.name}" does not have enough stock.`,
+        });
+      }
+      reduced.push(line);
+    }
+
+    let order;
+    try {
+      order = await Order.create({
+        user: req.user._id,
+        customer: {
+          fullName: customer.fullName,
+          phone: customer.phone,
+          city: customer.city,
+          address: customer.address,
+          paymentMethod: customer.paymentMethod === "bank" ? "bank" : "cod",
+        },
+        items: lines,
+        total,
+      });
+    } catch (err) {
+      await giveBackStock(reduced); 
+      throw err;
+    }
 
     res.status(201).json(formatOrder(order));
   })
 );
 
-// GET /api/orders/mine  (my own orders)
+
 router.get(
   "/mine",
   protect,
@@ -96,7 +132,7 @@ router.get(
   })
 );
 
-// GET /api/orders  (admin: all orders)
+
 router.get(
   "/",
   protect,
@@ -107,7 +143,7 @@ router.get(
   })
 );
 
-// GET /api/orders/:id  (owner or admin)
+
 router.get(
   "/:id",
   protect,
@@ -126,7 +162,7 @@ router.get(
   })
 );
 
-// PATCH /api/orders/:id/status  (admin changes the status)
+
 router.patch(
   "/:id/status",
   protect,
@@ -134,13 +170,43 @@ router.patch(
   wrap(async (req, res) => {
     const { status } = req.body || {};
     if (!STATUSES.includes(status)) {
-  return res.status(400).json({ message: "Invalid status." });
-}
+      return res.status(400).json({ message: "Invalid status." });
+    }
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ message: "Invalid order id" });
     }
-    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
+
+    const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: "Order not found" });
+
+    const wasCancelled = order.status === "Cancelled";
+    const nowCancelled = status === "Cancelled";
+
+    
+    if (!wasCancelled && nowCancelled) {
+      await giveBackStock(order.items);
+    }
+
+    
+    if (wasCancelled && !nowCancelled) {
+      const taken = [];
+      for (const line of order.items) {
+        const ok = await Product.findOneAndUpdate(
+          { _id: line.product, stock: { $gte: line.quantity } },
+          { $inc: { stock: -line.quantity } }
+        );
+        if (!ok) {
+          await giveBackStock(taken);
+          return res.status(400).json({
+            message: `Not enough stock of "${line.name}" to reopen this order.`,
+          });
+        }
+        taken.push(line);
+      }
+    }
+
+    order.status = status;
+    await order.save();
     res.json(formatOrder(order));
   })
 );

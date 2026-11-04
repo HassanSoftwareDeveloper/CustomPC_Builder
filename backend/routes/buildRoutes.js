@@ -9,11 +9,12 @@ const PART_TYPES = ["cpu", "motherboard", "ram", "gpu", "storage", "psu", "case"
 
 
 router.post("/check", async (req, res, next) => {
-  try {
-    const parts = {};
+ try {
+  const body = req.body || {};
+  const parts = {};
 
-    for (const type of PART_TYPES) {
-      const id = req.body[type];
+  for (const type of PART_TYPES) {
+    const id = body[type];
       if (!id) continue; 
 
       if (!mongoose.isValidObjectId(id)) {

@@ -18,12 +18,19 @@ const publicUser = (user) => ({
 // POST /api/auth/register
 router.post("/register", async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
+    const { name, email, password } = req.body || {};
+
+    if ([name, email, password].some((v) => typeof v !== "string")) {
+      return res.status(400).json({ message: "Name, email and password must be text." });
+    }
+    if (!name.trim() || !email.trim() || !password) {
       return res.status(400).json({ message: "Name, email and password are required." });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters." });
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      return res.status(400).json({ message: "Enter a valid email address." });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters." });
     }
     if (await User.findOne({ email: email.toLowerCase() })) {
       return res.status(409).json({ message: "This email is already registered." });
@@ -40,7 +47,10 @@ router.post("/register", async (req, res, next) => {
 // POST /api/auth/login
 router.post("/login", async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
+    if (typeof email !== "string" || typeof password !== "string") {
+      return res.status(400).json({ message: "Email and password must be text." });
+    }
     const user = await User.findOne({ email: (email || "").toLowerCase() }).select("+password");
 
     if (!user || !(await user.matchPassword(password || ""))) {
