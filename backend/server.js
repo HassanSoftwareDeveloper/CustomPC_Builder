@@ -15,7 +15,8 @@ import userRoutes from "./routes/userRoutes.js";
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const parsedPort = Number.parseInt(process.env.PORT ?? "", 10);
+const PORT = Number.isInteger(parsedPort) && parsedPort > 0 ? parsedPort : 4000;
 
 app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
 app.use(express.json());
