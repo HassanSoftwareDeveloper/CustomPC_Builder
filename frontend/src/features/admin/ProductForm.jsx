@@ -26,7 +26,7 @@ function toFormValues(product) {
   };
 }
 
-function ProductForm({ product, onSave, onCancel }) {
+function ProductForm({ product, onSave, onCancel, saving = false }) {
   const [values, setValues] = useState(() => toFormValues(product));
   const [errors, setErrors] = useState({});
 
@@ -59,7 +59,7 @@ function ProductForm({ product, onSave, onCancel }) {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-6"
+      className="flex flex-col gap-4 rounded-3xl border border-border bg-white p-5 shadow-lg shadow-ink/5 sm:p-7"
     >
       <h2 className="text-xl font-bold text-ink">
         {product ? "Edit product" : "Add product"}
@@ -84,7 +84,7 @@ function ProductForm({ product, onSave, onCancel }) {
           name="category"
           value={values.category}
           onChange={handleChange}
-          className="h-12 rounded-lg border border-border bg-surface px-3 text-ink focus:outline-2 focus:outline-primary"
+        className="h-12 rounded-xl border border-border bg-bg/60 px-3 text-ink outline-none transition focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
         >
           <option value="">Choose a category</option>
           {BUILDER_SLOTS.map((slot) => (
@@ -134,8 +134,8 @@ function ProductForm({ product, onSave, onCancel }) {
         onChange={handleChange}
       />
 
-      <div className="flex gap-3">
-        <Button type="submit">Save product</Button>
+      <div className="flex flex-wrap gap-3">
+        <Button type="submit" disabled={saving}>{saving ? "Saving…" : product ? "Save changes" : "Save product"}</Button>
         <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel
         </Button>

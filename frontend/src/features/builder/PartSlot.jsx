@@ -1,5 +1,5 @@
 function PartSlot({ slot, options, selectedId, onChange }) {
-  const chosen = options.find((product) => product.id === Number(selectedId));
+  const chosen = options.find((product) => String(product.id) === String(selectedId));
 
   return (
     <div className="glass-panel rounded-2xl p-4 transition hover:border-primary/20">

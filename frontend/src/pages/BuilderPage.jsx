@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { BUILDER_SLOTS } from "../data/builderSlots";
 import PartSlot from "../features/builder/PartSlot";
 import SummaryPanel from "../features/builder/SummaryPanel";
@@ -8,9 +9,16 @@ import { useProducts } from "../hooks/useProducts";
 import Icon from "../components/ui/Icon";
 
 function BuilderPage() {
+  const [searchParams] = useSearchParams();
   const { addToCart } = useCart();
   const { products, loading, error } = useProducts();
-  const [selected, setSelected] = useState({});
+  const [selected, setSelected] = useState(() => {
+    const category = searchParams.get("category");
+    const product = searchParams.get("product");
+    return category && product && BUILDER_SLOTS.includes(category)
+      ? { [category]: product }
+      : {};
+  });
   const [issues, setIssues] = useState([]);
 
   const handleChange = (slot, productId) => {

@@ -1,6 +1,6 @@
 import { request } from "./api";
 
-// backend key  ->  the name your screens use
+
 const LABEL_BY_KEY = {
   cpu: "Processor",
   motherboard: "Motherboard",
@@ -16,7 +16,7 @@ const KEY_BY_LABEL = Object.fromEntries(
   Object.entries(LABEL_BY_KEY).map(([key, label]) => [label, key])
 );
 
-// Backend shape -> your frontend shape
+
 function fromApi(p) {
   return {
     id: p._id,
@@ -32,7 +32,7 @@ function fromApi(p) {
   };
 }
 
-// Your frontend shape -> backend shape (used by the admin screens)
+
 function toApi(data) {
   return {
     name: data.name,
@@ -40,6 +40,7 @@ function toApi(data) {
     spec: data.spec,
     image: data.image,
     category: KEY_BY_LABEL[data.category] || data.category,
+    ...(data.stock !== undefined && data.stock !== "" ? { stock: Number(data.stock) } : {}),
     specs: { ...(data.specs || {}), ...(data.socket ? { socket: data.socket } : {}) },
   };
 }
@@ -53,7 +54,7 @@ export async function getProductById(id) {
   try {
     return fromApi(await request(`/products/${id}`));
   } catch {
-    return undefined; // same as before: not found = undefined
+    return undefined; 
   }
 }
 

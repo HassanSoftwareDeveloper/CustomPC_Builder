@@ -4,9 +4,9 @@ const VARIANT_CLASSES = {
   accent: "border-transparent bg-accent text-ink shadow-lg shadow-accent/20 hover:-translate-y-0.5 hover:bg-[#f6b27f]",
 };
 
-function Button({ children, variant = "primary", className = "", ...rest }) {
+function Button({ children, variant = "primary", className = "", type = "button", ...rest }) {
   return (
-    <button className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${VARIANT_CLASSES[variant] || VARIANT_CLASSES.primary} ${className}`} {...rest}>
+    <button type={type} className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${VARIANT_CLASSES[variant] || VARIANT_CLASSES.primary} ${className}`} {...rest}>
       {children}
     </button>
   );

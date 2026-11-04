@@ -25,7 +25,7 @@ const INITIAL_VALUES = {
   paymentMethod: "cod",
 };
 
-function CheckoutForm({ onSubmit, initialName = "" }) {
+function CheckoutForm({ onSubmit, initialName = "", submitting = false }) {
   const [values, setValues] = useState(() => ({
     ...INITIAL_VALUES,
     fullName: initialName,
@@ -129,7 +129,9 @@ function CheckoutForm({ onSubmit, initialName = "" }) {
         ))}
       </fieldset>
 
-      <Button type="submit">Place order</Button>
+      <Button type="submit" disabled={submitting} className="mt-1 rounded-full">
+        {submitting ? "Placing your order…" : "Place order"}
+      </Button>
     </form>
   );
 }

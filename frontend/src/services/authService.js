@@ -38,5 +38,5 @@ export async function signup({ name, email, password }) {
 
 
 export function getCustomers() {
-  return [];
+  return request("/users");
 }
