@@ -17,6 +17,7 @@ function AdminProductsPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const loadProducts = async () => {
     try {
@@ -45,22 +46,26 @@ function AdminProductsPage() {
   }, []);
 
   const openAddForm = () => {
+    setFormError("");
     setEditingProduct(null);
     setShowForm(true);
   };
 
   const openEditForm = (product) => {
+    setFormError("");
     setEditingProduct(product);
     setShowForm(true);
   };
 
   const closeForm = () => {
+    setFormError("");
     setShowForm(false);
     setEditingProduct(null);
   };
 
   const handleSave = async (values) => {
     setSaving(true);
+    setFormError("");
     try {
       if (editingProduct) {
         // keep the hidden compatibility details (specs) of the old product
@@ -75,7 +80,7 @@ function AdminProductsPage() {
       await loadProducts();
       closeForm();
     } catch (err) {
-      setMessage(err.message);
+      setFormError(err.message || "Could not save this product.");
     } finally {
       setSaving(false);
     }
@@ -141,6 +146,7 @@ function AdminProductsPage() {
             onSave={handleSave}
             onCancel={closeForm}
             saving={saving}
+            error={formError}
           />
         </div>
       )}

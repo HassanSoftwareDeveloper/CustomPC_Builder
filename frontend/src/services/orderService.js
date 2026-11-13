@@ -4,8 +4,20 @@ export function getOrders() {
   return request("/orders"); // admin: all orders
 }
 
+export function getActiveAdminOrders() {
+  return request("/orders?activeOnly=true");
+}
+
+export function archiveAdminOrderHistory() {
+  return request("/orders", { method: "DELETE" });
+}
+
 export function getMyOrders() {
   return request("/orders/mine");
+}
+
+export function clearMyOrderHistory() {
+  return request("/orders/mine/history", { method: "DELETE" });
 }
 
 // kept so older code doesn't break; the server knows who you are from your token

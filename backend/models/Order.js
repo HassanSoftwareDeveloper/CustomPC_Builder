@@ -21,6 +21,8 @@ const orderSchema = new mongoose.Schema(
     ],
     total: { type: Number, required: true },
     status: { type: String, default: "Pending" },
+    hiddenFromHistory: { type: Boolean, default: false },
+    archivedFromAdmin: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as authService from "../services/authService";
 import { AuthContext } from "./createAuthContext";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(authService.getStoredSession);
+
+  useEffect(() => {
+    const onExpired = () => setUser(null);
+    window.addEventListener("apna:session-expired", onExpired);
+    return () => window.removeEventListener("apna:session-expired", onExpired);
+  }, []);
 
   const login = async (credentials) => {
     const loggedInUser = await authService.login(credentials);

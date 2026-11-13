@@ -127,8 +127,23 @@ router.get(
   "/mine",
   protect,
   wrap(async (req, res) => {
-    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const orders = await Order.find({
+      user: req.user._id,
+      hiddenFromHistory: { $ne: true },
+    }).sort({ createdAt: -1 });
     res.json(orders.map(formatOrder));
+  })
+);
+
+router.delete(
+  "/mine/history",
+  protect,
+  wrap(async (req, res) => {
+    const result = await Order.updateMany(
+      { user: req.user._id, hiddenFromHistory: { $ne: true } },
+      { $set: { hiddenFromHistory: true } }
+    );
+    res.json({ clearedCount: result.modifiedCount });
   })
 );
 
@@ -138,8 +153,24 @@ router.get(
   protect,
   adminOnly,
   wrap(async (req, res) => {
-    const orders = await Order.find().sort({ createdAt: -1 });
+    const filter = req.query.activeOnly === "true"
+      ? { archivedFromAdmin: { $ne: true } }
+      : {};
+    const orders = await Order.find(filter).sort({ createdAt: -1 });
     res.json(orders.map(formatOrder));
+  })
+);
+
+router.delete(
+  "/",
+  protect,
+  adminOnly,
+  wrap(async (req, res) => {
+    const result = await Order.updateMany(
+      { archivedFromAdmin: { $ne: true } },
+      { $set: { archivedFromAdmin: true } }
+    );
+    res.json({ archivedCount: result.modifiedCount });
   })
 );
 
@@ -157,6 +188,9 @@ router.get(
     const isOwner = String(order.user) === String(req.user._id);
     if (!isOwner && req.user.role !== "admin") {
       return res.status(403).json({ message: "This is not your order." });
+    }
+    if (isOwner && order.hiddenFromHistory) {
+      return res.status(404).json({ message: "Order not found." });
     }
     res.json(formatOrder(order));
   })

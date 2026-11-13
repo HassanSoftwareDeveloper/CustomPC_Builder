@@ -9,9 +9,12 @@ const EMPTY_VALUES = {
   category: "",
   spec: "",
   price: "",
+  stock: "",
   socket: "",
   image: "",
 };
+
+const PRODUCT_CATEGORIES = [...BUILDER_SLOTS, "Case", "Cooler"];
 
 function toFormValues(product) {
   if (!product) return EMPTY_VALUES;
@@ -21,12 +24,13 @@ function toFormValues(product) {
     category: product.category,
     spec: product.spec || "",
     price: String(product.price),
+    stock: String(product.stock ?? 0),
     socket: product.socket || "",
     image: product.image || "",
   };
 }
 
-function ProductForm({ product, onSave, onCancel, saving = false }) {
+function ProductForm({ product, onSave, onCancel, saving = false, error = "" }) {
   const [values, setValues] = useState(() => toFormValues(product));
   const [errors, setErrors] = useState({});
 
@@ -47,6 +51,7 @@ function ProductForm({ product, onSave, onCancel, saving = false }) {
       spec: values.spec.trim(),
       price: Number(values.price),
       image: values.image.trim(),
+      ...(values.stock !== "" ? { stock: Number(values.stock) } : {}),
     };
     if (values.socket.trim()) {
       cleaned.socket = values.socket.trim().toUpperCase();
@@ -87,7 +92,7 @@ function ProductForm({ product, onSave, onCancel, saving = false }) {
         className="h-12 rounded-xl border border-border bg-bg/60 px-3 text-ink outline-none transition focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
         >
           <option value="">Choose a category</option>
-          {BUILDER_SLOTS.map((slot) => (
+          {PRODUCT_CATEGORIES.map((slot) => (
             <option key={slot} value={slot}>
               {slot}
             </option>
@@ -117,6 +122,18 @@ function ProductForm({ product, onSave, onCancel, saving = false }) {
         error={errors.price}
       />
       <Input
+        id="stock"
+        name="stock"
+        type="number"
+        min="0"
+        step="1"
+        label="Stock quantity"
+        placeholder="10"
+        value={values.stock}
+        onChange={handleChange}
+        error={errors.stock}
+      />
+      <Input
         id="socket"
         name="socket"
         label="Socket (processors and motherboards only)"
@@ -133,6 +150,8 @@ function ProductForm({ product, onSave, onCancel, saving = false }) {
         value={values.image}
         onChange={handleChange}
       />
+
+      {error && <p role="alert" className="text-sm font-medium text-danger">{error}</p>}
 
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={saving}>{saving ? "Saving…" : product ? "Save changes" : "Save product"}</Button>

@@ -52,7 +52,7 @@ export function validateCheckout({ fullName, phone, city, address }) {
 }
 
 const SOCKET_CATEGORIES = ["Processor", "Motherboard"];
-export function validateProduct({ name, category, price , socket}) {
+export function validateProduct({ name, category, price, stock, socket }) {
   const errors = {};
 
   if (name.trim().length < 2) {
@@ -63,6 +63,14 @@ export function validateProduct({ name, category, price , socket}) {
   }
   if (!(Number(price) > 0)) {
     errors.price = "Enter a price greater than 0.";
+  }
+
+  if (
+    stock !== "" &&
+    stock !== undefined &&
+    (!Number.isInteger(Number(stock)) || Number(stock) < 0)
+  ) {
+    errors.stock = "Stock must be a whole number of 0 or more.";
   }
 
   if (SOCKET_CATEGORIES.includes(category) && !socket.trim()){

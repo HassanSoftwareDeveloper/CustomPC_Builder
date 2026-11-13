@@ -16,6 +16,7 @@ export function getStoredSession() {
 }
 
 export function logout() {
+  request("/auth/logout", { method: "POST" }).catch(() => {});
   localStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(TOKEN_KEY);
 }
@@ -35,7 +36,6 @@ export async function signup({ name, email, password }) {
   });
   return startSession(data);
 }
-
 
 export function getCustomers() {
   return request("/users");

@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "../components/ui/Icon";
 import { ORDER_STATUSES } from "../constants/orderStatus";
-import { getOrders, updateOrderStatus } from "../services/orderService";
+import {
+  archiveAdminOrderHistory,
+  getActiveAdminOrders,
+  updateOrderStatus,
+} from "../services/orderService";
 
 const formatMoney = (value) => `Rs ${Number(value || 0).toLocaleString()}`;
 
@@ -13,10 +17,11 @@ function AdminOrdersPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+  const [isArchiving, setIsArchiving] = useState(false);
 
   useEffect(() => {
     let active = true;
-    getOrders()
+    getActiveAdminOrders()
       .then((list) => active && setOrders(list))
       .catch(
         (err) => active && setMessage(err.message || "Could not load orders."),
@@ -26,6 +31,26 @@ function AdminOrdersPage() {
       active = false;
     };
   }, []);
+
+  const handleClearHistory = async () => {
+    const confirmed = window.confirm(
+      `Archive all ${orders.length} orders from this list? They will remain in reports and customer accounts.`
+    );
+    if (!confirmed) return;
+
+    setMessage("");
+    setIsArchiving(true);
+    try {
+      await archiveAdminOrderHistory();
+      setOrders([]);
+      setSearch("");
+      setStatusFilter("All");
+    } catch (err) {
+      setMessage(err.message || "Could not clear the order list.");
+    } finally {
+      setIsArchiving(false);
+    }
+  };
 
   const handleStatusChange = async (orderId, newStatus) => {
     const previousOrders = orders;
@@ -105,6 +130,17 @@ function AdminOrdersPage() {
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
+            {orders.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearHistory}
+                disabled={isArchiving || updatingId !== null}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Icon name="trash" className="h-4 w-4" />
+                {isArchiving ? "Clearing…" : "Clear order history"}
+              </button>
+            )}
             <label className="relative block sm:w-64">
               <span className="sr-only">Search orders</span>
               <Icon

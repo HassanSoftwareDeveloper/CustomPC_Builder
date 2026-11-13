@@ -2,17 +2,37 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "../components/ui/Icon";
 import { useAuth } from "../hooks/useAuth";
-import { getMyOrders } from "../services/orderService";
+import { clearMyOrderHistory, getMyOrders } from "../services/orderService";
 
 function AccountPage() {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
+  const [isClearing, setIsClearing] = useState(false);
+  const [historyError, setHistoryError] = useState("");
 
   useEffect(() => {
     getMyOrders()
       .then(setOrders)
       .catch(() => setOrders([]));
   }, []);
+
+  async function handleClearHistory() {
+    const confirmed = window.confirm(
+      "Clear your order history from this account? Admin order records and reports will be kept."
+    );
+    if (!confirmed) return;
+
+    setIsClearing(true);
+    setHistoryError("");
+    try {
+      await clearMyOrderHistory();
+      setOrders([]);
+    } catch (error) {
+      setHistoryError(error.message || "Could not clear your order history. Please try again.");
+    } finally {
+      setIsClearing(false);
+    }
+  }
 
   return (
     <div className="content-width py-9 sm:py-12">
@@ -64,10 +84,31 @@ function AccountPage() {
               </p>
               <h2 className="mt-1 text-xl font-black text-ink">Your orders</h2>
             </div>
-            <span className="rounded-full bg-white/80 px-3 py-1.5 text-xs font-bold text-muted">
-              {orders.length} total
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-white/80 px-3 py-1.5 text-xs font-bold text-muted">
+                {orders.length} total
+              </span>
+              {orders.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearHistory}
+                  disabled={isClearing}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-red-200 bg-white/80 px-3 text-xs font-bold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Icon name="trash" className="h-4 w-4" />
+                  {isClearing ? "Clearing…" : "Clear history"}
+                </button>
+              )}
+            </div>
           </div>
+          {historyError && (
+            <p
+              role="alert"
+              className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+            >
+              {historyError}
+            </p>
+          )}
           {orders.length === 0 ? (
             <div className="glass-panel mt-4 rounded-2xl p-7 text-center sm:p-10">
               <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
