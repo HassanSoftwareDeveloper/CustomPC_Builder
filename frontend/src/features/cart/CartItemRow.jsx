@@ -3,6 +3,8 @@ import ProductImage from "../../components/ui/ProductImage";
 import { getProductImage } from "../../utils/productImage";
 
 function CartItemRow({ item, onChangeQuantity, onRemove }) {
+  const maxed = typeof item.stock === "number" && item.quantity >= item.stock;
+
   return (
     <article className="glass-panel flex flex-wrap items-center gap-4 rounded-2xl p-3.5 sm:p-4">
       <ProductImage
@@ -16,6 +18,11 @@ function CartItemRow({ item, onChangeQuantity, onRemove }) {
         </p>
         <h3 className="mt-1 font-extrabold text-ink">{item.name}</h3>
         <p className="mt-1 text-xs text-muted">{item.spec}</p>
+        {maxed && (
+          <p className="mt-1 text-xs font-semibold text-danger">
+            Only {item.stock} available
+          </p>
+        )}
       </div>
       <div className="flex items-center gap-2 rounded-full border border-border/80 bg-white/70 p-1">
         <button
@@ -33,7 +40,8 @@ function CartItemRow({ item, onChangeQuantity, onRemove }) {
           type="button"
           aria-label={`Increase ${item.name} quantity`}
           onClick={() => onChangeQuantity(item.id, 1)}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-lg text-ink hover:bg-primary/10 hover:text-primary"
+          disabled={maxed}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-lg text-ink hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-ink"
         >
           +
         </button>

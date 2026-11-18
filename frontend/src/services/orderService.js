@@ -29,7 +29,7 @@ export async function getOrderById(id) {
   try {
     return await request(`/orders/${id}`);
   } catch {
-    return undefined; // not found = undefined, same as before
+    return undefined; // not found 
   }
 }
 

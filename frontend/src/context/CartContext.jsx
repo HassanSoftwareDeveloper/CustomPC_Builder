@@ -24,15 +24,40 @@ export function CartProvider({ children }) {
     return () => window.clearTimeout(timeoutId);
   }, [toastMessage]);
 
+  // Optional: empty the cart when the user logs out
+  useEffect(() => {
+    const onLogout = () => setItems([]);
+    window.addEventListener("apna:logout", onLogout);
+    return () => window.removeEventListener("apna:logout", onLogout);
+  }, []);
+
   const addToCart = (product) => {
+    const existing = items.find((item) => item.id === product.id);
+    const inCart = existing ? existing.quantity : 0;
+    const knowsStock = typeof product.stock === "number";
+
+    if (knowsStock && product.stock <= 0) {
+      setToastMessage(`${product.name} is out of stock.`);
+      return;
+    }
+    if (knowsStock && inCart + 1 > product.stock) {
+      setToastMessage(`Only ${product.stock} of ${product.name} available.`);
+      return;
+    }
+
     setToastMessage(`Added ${product.name} to your cart.`);
     setItems((current) => {
-      const existing = current.find((item) => item.id === product.id);
+      const found = current.find((item) => item.id === product.id);
 
-      if (existing) {
+      if (found) {
         return current.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? {
+                ...item,
+                // keep the newest stock number we know about
+                ...(knowsStock ? { stock: product.stock } : {}),
+                quantity: item.quantity + 1,
+              }
             : item,
         );
       }
@@ -42,6 +67,18 @@ export function CartProvider({ children }) {
   };
 
   const changeQuantity = (id, amount) => {
+    const target = items.find((item) => item.id === id);
+
+    if (
+      target &&
+      amount > 0 &&
+      typeof target.stock === "number" &&
+      target.quantity + amount > target.stock
+    ) {
+      setToastMessage(`Only ${target.stock} of ${target.name} available.`);
+      return;
+    }
+
     setItems((current) =>
       current
         .map((item) =>

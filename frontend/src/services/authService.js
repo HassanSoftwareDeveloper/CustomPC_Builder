@@ -19,6 +19,7 @@ export function logout() {
   request("/auth/logout", { method: "POST" }).catch(() => {});
   localStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(TOKEN_KEY);
+  window.dispatchEvent(new Event("apna:logout"));
 }
 
 export async function login({ email, password }) {

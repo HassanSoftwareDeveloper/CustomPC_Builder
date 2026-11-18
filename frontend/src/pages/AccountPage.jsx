@@ -18,7 +18,7 @@ function AccountPage() {
 
   async function handleClearHistory() {
     const confirmed = window.confirm(
-      "Clear your order history from this account? Admin order records and reports will be kept."
+      "Clear your order history from this account? Admin order records and reports will be kept.",
     );
     if (!confirmed) return;
 
@@ -28,7 +28,10 @@ function AccountPage() {
       await clearMyOrderHistory();
       setOrders([]);
     } catch (error) {
-      setHistoryError(error.message || "Could not clear your order history. Please try again.");
+      setHistoryError(
+        error.message ||
+          "Could not clear your order history. Please try again.",
+      );
     } finally {
       setIsClearing(false);
     }
@@ -132,7 +135,7 @@ function AccountPage() {
               {orders.map((order) => (
                 <Link
                   key={order.id}
-                  to={`/order-confirmation/${order.id}`}
+                  to={`/track-order/${order.id}`}
                   className="glass-panel flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4 transition hover:-translate-y-0.5 hover:shadow-lg"
                 >
                   <div>

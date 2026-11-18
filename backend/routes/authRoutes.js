@@ -10,7 +10,6 @@ const router = express.Router();
 const REFRESH_DAYS = 7;
 const REFRESH_COOKIE = "apna_refresh";
 
-// Cookie settings: JavaScript in the browser can NOT read this cookie
 const cookieOptions = {
   httpOnly: true,
   sameSite: "lax",
@@ -18,13 +17,11 @@ const cookieOptions = {
   path: "/api/auth",
 };
 
-// Short-lived day pass (15 minutes)
 const makeAccessToken = (user) =>
   jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
 const hash = (value) => crypto.createHash("sha256").update(value).digest("hex");
 
-// Long-lived membership card: random text, saved (hashed) in MongoDB, sent as a cookie
 async function issueRefreshCookie(user, res) {
   const raw = crypto.randomBytes(40).toString("hex");
   await RefreshToken.create({
@@ -45,7 +42,6 @@ const publicUser = (user) => ({
   role: user.role,
 });
 
-// POST /api/auth/register
 router.post("/register", async (req, res, next) => {
   try {
     const { name, email, password } = req.body || {};
@@ -74,7 +70,6 @@ router.post("/register", async (req, res, next) => {
         .json({ message: "This email is already registered." });
     }
 
-    // role is NOT taken from the request, so nobody can sign up as admin
     const user = await User.create({ name, email, password });
     await issueRefreshCookie(user, res);
     res
@@ -85,7 +80,6 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
-// POST /api/auth/login
 router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body || {};
@@ -113,8 +107,6 @@ router.post("/refresh", async (req, res, next) => {
     const raw = req.cookies?.[REFRESH_COOKIE];
     if (!raw) return res.status(401).json({ message: "Please log in first." });
 
-    // find AND delete in one step: each card can be used only once
-
     const record = await RefreshToken.findOneAndDelete({
       tokenHash: hash(raw),
     });
@@ -132,14 +124,12 @@ router.post("/refresh", async (req, res, next) => {
       return res.status(401).json({ message: "User no longer exists." });
     }
 
-    await issueRefreshCookie(user, res); //  new card
+    await issueRefreshCookie(user, res);
     res.json({ token: makeAccessToken(user), user: publicUser(user) });
   } catch (err) {
     next(err);
   }
 });
-
-// POST /api/auth/logout  (
 
 router.post("/logout", async (req, res, next) => {
   try {
@@ -152,7 +142,6 @@ router.post("/logout", async (req, res, next) => {
   }
 });
 
-// GET /api/auth/me  (who am I?)
 router.get("/me", protect, (req, res) => {
   res.json({ user: publicUser(req.user) });
 });

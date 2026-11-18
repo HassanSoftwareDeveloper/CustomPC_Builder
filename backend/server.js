@@ -12,6 +12,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
@@ -36,6 +37,7 @@ app.get("/api/health", (req, res) => {
 });
 app.use("/api/products", productRoutes);
 app.use("/api/builds", buildRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.use("/api", (req, res) => {
   res.status(404).json({ message: "API route not found." });

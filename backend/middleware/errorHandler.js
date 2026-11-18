@@ -8,6 +8,8 @@ export function errorHandler(error, req, res, next) {
     return res.status(400).json({ message: messages.join(" ") });
   }
 
+
+
   if (error.code === 11000) {
     const field = Object.keys(error.keyPattern || {})[0] || "value";
     const message =
@@ -16,6 +18,8 @@ export function errorHandler(error, req, res, next) {
         : `That ${field} already exists.`;
     return res.status(409).json({ message });
   }
+
+  
 
   console.error(error);
   res.status(500).json({ message: "Something went wrong on the server." });

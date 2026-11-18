@@ -18,6 +18,7 @@ import AdminCustomersPage from "./pages/AdminCustomersPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { ROLES } from "./constants/roles";
 import NotFoundPage from "./pages/NotFoundPage";
+import TrackOrderPage from "./pages/TrackOrderPage";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/track-order/:id" element={<TrackOrderPage />} />
         </Route>
       </Route>
 
