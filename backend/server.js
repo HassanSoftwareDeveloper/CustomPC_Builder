@@ -19,12 +19,11 @@ const app = express();
 const parsedPort = Number.parseInt(process.env.PORT ?? "", 10);
 const PORT = Number.isInteger(parsedPort) && parsedPort > 0 ? parsedPort : 4000;
 
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    credentials: true,
-  }),
-);
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((url) => url.trim());
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 

@@ -10,10 +10,13 @@ const router = express.Router();
 const REFRESH_DAYS = 7;
 const REFRESH_COOKIE = "apna_refresh";
 
+const isProd = process.env.NODE_ENV === "production";
+
+// Cookie settings: JavaScript in the browser can NOT read this cookie
 const cookieOptions = {
   httpOnly: true,
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production",
+  sameSite: isProd ? "none" : "lax",
+  secure: isProd,
   path: "/api/auth",
 };
 
