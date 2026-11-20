@@ -13,6 +13,9 @@ import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import http from "node:http";
+import { initSocket } from "./socket/index.js";
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
@@ -22,7 +25,8 @@ const PORT = Number.isInteger(parsedPort) && parsedPort > 0 ? parsedPort : 4000;
 const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
   .split(",")
   .map((url) => url.trim());
-
+const httpServer = http.createServer(app);
+initSocket(httpServer, allowedOrigins);
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
@@ -37,6 +41,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/products", productRoutes);
 app.use("/api/builds", buildRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use("/api", (req, res) => {
   res.status(404).json({ message: "API route not found." });
@@ -50,7 +55,7 @@ async function start() {
       throw new Error("JWT_SECRET is missing in the .env file.");
     }
     await connectDB();
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
   } catch (error) {

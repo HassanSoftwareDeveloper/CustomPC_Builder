@@ -34,7 +34,10 @@ router.get(
       { $group: { _id: null, orders: { $sum: 1 }, sales: { $sum: "$total" } } },
     ]);
 
-    const pendingOrders = await Order.countDocuments({ status: "Pending" });
+    const pendingOrders = await Order.countDocuments({
+      createdAt: { $gte: since },
+      status: "Pending",
+    });
     const cancelledOrders = await Order.countDocuments({
       createdAt: { $gte: since },
       status: "Cancelled",
@@ -141,7 +144,11 @@ router.get(
 router.get(
   "/low-stock",
   wrap(async (req, res) => {
-    const threshold = Math.max(Number(req.query.threshold) || 5, 0);
+    const rawThreshold = Number(req.query.threshold);
+
+    const threshold = Number.isFinite(rawThreshold)
+      ? Math.max(Math.floor(rawThreshold), 0)
+      : 5;
     const products = await Product.find({ stock: { $lte: threshold } })
       .sort({ stock: 1 })
       .limit(10);

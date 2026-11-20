@@ -13,6 +13,7 @@ const REFRESH_COOKIE = "apna_refresh";
 const isProd = process.env.NODE_ENV === "production";
 
 // Cookie settings: JavaScript in the browser can NOT read this cookie
+
 const cookieOptions = {
   httpOnly: true,
   sameSite: isProd ? "none" : "lax",

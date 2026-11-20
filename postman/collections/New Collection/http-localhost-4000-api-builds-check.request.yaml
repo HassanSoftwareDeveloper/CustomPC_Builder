@@ -1,15 +1,11 @@
 $kind: http-request
-name: http://localhost:4000/api/builds/check
-description: ""
-url: http://localhost:4000/api/auth/login
-method: POST
-body:
-  type: json
-  content: "{\r
-
-    \  \"email\": \"admin@apnapc.test\",\r
-
-    \  \"password\": \"admin123\"\r
-
-    }"
+name: 'PATCH /api/notifications/:id/read'
+description: 'Mark a single notification as read. Requires a valid Bearer token.'
+url: 'http://localhost:4000/api/notifications/6afec09cec5dbf4cf5ddbe08/read'
+method: PATCH
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{access_token}}'
 order: 1000

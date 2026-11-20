@@ -5,17 +5,24 @@ import { checkBuild } from "../utils/compatibility.js";
 
 const router = express.Router();
 
-const PART_TYPES = ["cpu", "motherboard", "ram", "gpu", "storage", "psu", "case"];
-
+const PART_TYPES = [
+  "cpu",
+  "motherboard",
+  "ram",
+  "gpu",
+  "storage",
+  "psu",
+  "case",
+];
 
 router.post("/check", async (req, res, next) => {
- try {
-  const body = req.body || {};
-  const parts = {};
+  try {
+    const body = req.body || {};
+    const parts = {};
 
-  for (const type of PART_TYPES) {
-    const id = body[type];
-      if (!id) continue; 
+    for (const type of PART_TYPES) {
+      const id = body[type];
+      if (!id) continue;
 
       if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({ message: `Invalid id for ${type}` });

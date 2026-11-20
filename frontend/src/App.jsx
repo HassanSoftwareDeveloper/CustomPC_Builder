@@ -19,41 +19,44 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import { ROLES } from "./constants/roles";
 import NotFoundPage from "./pages/NotFoundPage";
 import TrackOrderPage from "./pages/TrackOrderPage";
+import { NotificationProvider } from "./context/NotificationContext";
 
 function App() {
   return (
-    <Routes>
-      <Route element={<PublicLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/parts" element={<CatalogPage />} />
-        <Route path="/parts/:id" element={<ProductPage />} />
-        <Route path="/builder" element={<BuilderPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route
-          path="/order-confirmation/:id"
-          element={<OrderConfirmationPage />}
-        />
-        <Route path="*" element={<NotFoundPage />} />
+    <NotificationProvider>
+      <Routes>
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/parts" element={<CatalogPage />} />
+          <Route path="/parts/:id" element={<ProductPage />} />
+          <Route path="/builder" element={<BuilderPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route
+            path="/order-confirmation/:id"
+            element={<OrderConfirmationPage />}
+          />
+          <Route path="*" element={<NotFoundPage />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/track-order/:id" element={<TrackOrderPage />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/track-order/:id" element={<TrackOrderPage />} />
+          </Route>
         </Route>
-      </Route>
 
-      <Route element={<ProtectedRoute allowedRole={ROLES.ADMIN} />}>
-        <Route element={<AdminLayout />}>
-          <Route path="/admin" element={<AdminDashboardPage />} />
-          <Route path="/admin/orders" element={<AdminOrdersPage />} />
-          <Route path="/admin/products" element={<AdminProductsPage />} />
-          <Route path="/admin/customers" element={<AdminCustomersPage />} />
+        <Route element={<ProtectedRoute allowedRole={ROLES.ADMIN} />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin/orders" element={<AdminOrdersPage />} />
+            <Route path="/admin/products" element={<AdminProductsPage />} />
+            <Route path="/admin/customers" element={<AdminCustomersPage />} />
+          </Route>
         </Route>
-      </Route>
 
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-    </Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Routes>
+    </NotificationProvider>
   );
 }
 

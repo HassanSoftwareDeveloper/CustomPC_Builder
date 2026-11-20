@@ -5,7 +5,7 @@ export const API_URL =
 
 let refreshing = null;
 
-function refreshAccessToken() {
+export function refreshAccessToken() {
   if (!refreshing) {
     refreshing = fetch(`${API_URL}/auth/refresh`, {
       method: "POST",
@@ -14,6 +14,9 @@ function refreshAccessToken() {
       .then(async (res) => {
         const data = await res.json().catch(() => null);
         if (!res.ok) throw new Error(data?.message || "Session expired");
+        if (!data?.token || !data?.user) {
+          throw new Error("Invalid refresh response");
+        }
         localStorage.setItem(STORAGE_KEYS.TOKEN, data.token);
         localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(data.user));
       })

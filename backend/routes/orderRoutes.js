@@ -3,11 +3,21 @@ import mongoose from "mongoose";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import {
+  notifyOrderPlaced,
+  notifyOrderStatus,
+} from "../services/notificationService.js";
 
 const router = express.Router();
-const STATUSES = ["Pending", "Assembling", "Testing", "Shipped", "Delivered", "Cancelled"];
+const STATUSES = [
+  "Pending",
+  "Assembling",
+  "Testing",
+  "Shipped",
+  "Delivered",
+  "Cancelled",
+];
 const wrap = (fn) => (req, res, next) => fn(req, res, next).catch(next);
-
 
 function formatOrder(doc) {
   const o = doc.toObject();
@@ -30,10 +40,12 @@ function formatOrder(doc) {
 
 async function giveBackStock(lines) {
   for (const line of lines) {
-    await Product.updateOne({ _id: line.product }, { $inc: { stock: line.quantity } });
+    await Product.updateOne(
+      { _id: line.product },
+      { $inc: { stock: line.quantity } },
+    );
   }
 }
-
 
 router.post(
   "/",
@@ -41,17 +53,26 @@ router.post(
   wrap(async (req, res) => {
     const { customer, items } = req.body || {};
 
-    if (!customer?.fullName || !customer?.phone || !customer?.city || !customer?.address) {
-      return res.status(400).json({ message: "Please fill in all delivery details." });
+    if (
+      !customer?.fullName ||
+      !customer?.phone ||
+      !customer?.city ||
+      !customer?.address
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Please fill in all delivery details." });
     }
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Your cart is empty." });
     }
     if (items.some((i) => !mongoose.isValidObjectId(i?.id))) {
-      return res.status(400).json({ message: "Your cart has an old item. Please clear it and add parts again." });
+      return res.status(400).json({
+        message:
+          "Your cart has an old item. Please clear it and add parts again.",
+      });
     }
 
-    
     const wanted = new Map();
     for (const item of items) {
       const quantity = Number(item.quantity);
@@ -70,9 +91,11 @@ router.post(
     for (const [id, quantity] of wanted) {
       const product = byId.get(id);
       if (!product) {
-        return res.status(400).json({ message: "A part in your cart no longer exists." });
+        return res
+          .status(400)
+          .json({ message: "A part in your cart no longer exists." });
       }
-      total += product.price * quantity; 
+      total += product.price * quantity;
       lines.push({
         product: product._id,
         name: product.name,
@@ -82,16 +105,15 @@ router.post(
       });
     }
 
-  
     const reduced = [];
     for (const line of lines) {
       const updated = await Product.findOneAndUpdate(
         { _id: line.product, stock: { $gte: line.quantity } },
-        { $inc: { stock: -line.quantity } }
+        { $inc: { stock: -line.quantity } },
       );
 
       if (!updated) {
-        await giveBackStock(reduced); 
+        await giveBackStock(reduced);
         return res.status(400).json({
           message: `Sorry, "${line.name}" does not have enough stock.`,
         });
@@ -114,14 +136,16 @@ router.post(
         total,
       });
     } catch (err) {
-      await giveBackStock(reduced); 
+      await giveBackStock(reduced);
       throw err;
     }
 
+    notifyOrderPlaced(order).catch((err) =>
+      console.error("Notification failed:", err.message),
+    );
     res.status(201).json(formatOrder(order));
-  })
+  }),
 );
-
 
 router.get(
   "/mine",
@@ -132,7 +156,7 @@ router.get(
       hiddenFromHistory: { $ne: true },
     }).sort({ createdAt: -1 });
     res.json(orders.map(formatOrder));
-  })
+  }),
 );
 
 router.delete(
@@ -141,24 +165,24 @@ router.delete(
   wrap(async (req, res) => {
     const result = await Order.updateMany(
       { user: req.user._id, hiddenFromHistory: { $ne: true } },
-      { $set: { hiddenFromHistory: true } }
+      { $set: { hiddenFromHistory: true } },
     );
     res.json({ clearedCount: result.modifiedCount });
-  })
+  }),
 );
-
 
 router.get(
   "/",
   protect,
   adminOnly,
   wrap(async (req, res) => {
-    const filter = req.query.activeOnly === "true"
-      ? { archivedFromAdmin: { $ne: true } }
-      : {};
+    const filter =
+      req.query.activeOnly === "true"
+        ? { archivedFromAdmin: { $ne: true } }
+        : {};
     const orders = await Order.find(filter).sort({ createdAt: -1 });
     res.json(orders.map(formatOrder));
-  })
+  }),
 );
 
 router.delete(
@@ -168,12 +192,11 @@ router.delete(
   wrap(async (req, res) => {
     const result = await Order.updateMany(
       { archivedFromAdmin: { $ne: true } },
-      { $set: { archivedFromAdmin: true } }
+      { $set: { archivedFromAdmin: true } },
     );
     res.json({ archivedCount: result.modifiedCount });
-  })
+  }),
 );
-
 
 router.get(
   "/:id",
@@ -193,9 +216,8 @@ router.get(
       return res.status(404).json({ message: "Order not found." });
     }
     res.json(formatOrder(order));
-  })
+  }),
 );
-
 
 router.patch(
   "/:id/status",
@@ -216,18 +238,16 @@ router.patch(
     const wasCancelled = order.status === "Cancelled";
     const nowCancelled = status === "Cancelled";
 
-    
     if (!wasCancelled && nowCancelled) {
       await giveBackStock(order.items);
     }
 
-    
     if (wasCancelled && !nowCancelled) {
       const taken = [];
       for (const line of order.items) {
         const ok = await Product.findOneAndUpdate(
           { _id: line.product, stock: { $gte: line.quantity } },
-          { $inc: { stock: -line.quantity } }
+          { $inc: { stock: -line.quantity } },
         );
         if (!ok) {
           await giveBackStock(taken);
@@ -239,10 +259,17 @@ router.patch(
       }
     }
 
+    const previousStatus = order.status;
     order.status = status;
     await order.save();
+
+    if (previousStatus !== status) {
+      notifyOrderStatus(order).catch((err) =>
+        console.error("Notification failed:", err.message),
+      );
+    }
     res.json(formatOrder(order));
-  })
+  }),
 );
 
 export default router;
